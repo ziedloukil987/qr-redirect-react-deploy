@@ -9,6 +9,11 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: BACKEND_HOSTPORT
+        fromService:
+          type: pserv
+          name: qr-backend
+          property: hostport
 
   - type: pserv
     name: qr-backend
@@ -18,12 +23,7 @@ services:
     dockerContext: ./backend
     envVars:
       - key: PORT
-        value: 10000
-      - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: qr-frontend
-          property: host
+        value: 3000
       - key: MONGODB_URI
         value: mongodb://qr-mongodb:27017/qr_redirect_react
       - key: ADMIN_PASSWORD
