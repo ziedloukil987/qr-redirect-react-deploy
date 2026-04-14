@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: qr-frontend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  - type: pserv
+    name: qr-backend
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: qr-frontend
+          property: host
+      - key: MONGODB_URI
+        value: mongodb://qr-mongodb:27017/qr_redirect_react
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
+
+  - type: pserv
+    name: qr-mongodb
+    runtime: image
+    plan: starter
+    image:
+      url: docker.io/mongo:7
+    dockerCommand: mongod --bind_ip_all --dbpath /data/db
+    disk:
+      name: data
+      mountPath: /data/db
+      sizeGB: 1
