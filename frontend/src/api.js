@@ -1,8 +1,18 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+
+async function parseJsonSafely(response) {
+  const text = await response.text();
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Expected JSON but received: ${text.slice(0, 200)}`);
+  }
+}
 
 export async function getQrInfo(code) {
   const response = await fetch(`${API_BASE_URL}/qr/${encodeURIComponent(code)}`);
-  const data = await response.json();
+  const data = await parseJsonSafely(response);
   return { ok: response.ok, data };
 }
 
@@ -18,7 +28,7 @@ export async function submitQrForm(code, payload) {
     }
   );
 
-  const data = await response.json();
+  const data = await parseJsonSafely(response);
   return { ok: response.ok, data };
 }
 
@@ -31,7 +41,7 @@ export async function adminLogin(password) {
     body: JSON.stringify({ password })
   });
 
-  const data = await response.json();
+  const data = await parseJsonSafely(response);
   return { ok: response.ok, data };
 }
 
@@ -42,6 +52,6 @@ export async function getAdminSubmissions(token) {
     }
   });
 
-  const data = await response.json();
+  const data = await parseJsonSafely(response);
   return { ok: response.ok, data };
 }
