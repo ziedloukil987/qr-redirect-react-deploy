@@ -36,7 +36,7 @@ services:
     runtime: image
     plan: starter
     image:
-      url: docker.io/mongo:7
+      url: mongo:7
     dockerCommand: mongod --bind_ip_all --dbpath /data/db
     disk:
       name: data
