@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAdminSubmissions } from "../api";
+import { getAdminSubmissions, exportAdminSubmissions } from "../api";
 
 export default function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
