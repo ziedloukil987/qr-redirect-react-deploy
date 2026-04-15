@@ -46,6 +46,22 @@ export default function AdminSubmissionsPage() {
     navigate("/admin/login");
   }
 
+    async function handleExport() {
+  try {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      navigate("/admin/login");
+      return;
+    }
+
+    await exportAdminSubmissions(token);
+  } catch (error) {
+    console.error(error);
+    setServerError("Unable to export submissions.");
+  }
+}
+
   return (
     <div className="admin-page">
       <div className="admin-container">
@@ -55,9 +71,14 @@ export default function AdminSubmissionsPage() {
             <p>All submitted entries are shown below.</p>
           </div>
 
-          <button className="btn admin-logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
+          <div className="admin-actions">
+            <button className="btn admin-export-btn" onClick={handleExport}>
+              Export Excel
+            </button>
+            <button className="btn admin-logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         </div>
 
         {loading && <div className="admin-card">Loading submissions...</div>}

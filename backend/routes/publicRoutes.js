@@ -153,4 +153,64 @@ router.get("/admin/submissions", adminAuth, async (req, res) => {
   }
 });
 
+// Admin: export submissions as CSV
+router.get("/admin/submissions/export", adminAuth, async (req, res) => {
+  try {
+    const submissions = await Submission.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const escapeCsv = (value) => {
+      if (value === null || value === undefined) return '""';
+      const str = String(value).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const headers = [
+      "First Name",
+      "Last Name",
+      "Email",
+      "Phone Number",
+      "QR Code",
+      "QR Label",
+      "Redirect URL",
+      "IP Address",
+      "User Agent",
+      "Created At"
+    ];
+
+    const rows = submissions.map((item) => [
+      item.firstName || "",
+      item.lastName || "",
+      item.email || "",
+      item.phoneNumber || "",
+      item.qrCode || "",
+      item.qrLabel || "",
+      item.redirectUrl || "",
+      item.ipAddress || "",
+      item.userAgent || "",
+      item.createdAt ? new Date(item.createdAt).toLocaleString("fr-FR") : ""
+    ]);
+
+    const csvContent = [
+      headers.map(escapeCsv).join(","),
+      ...rows.map((row) => row.map(escapeCsv).join(","))
+    ].join("\n");
+
+    // BOM helps Excel open UTF-8 CSV correctly
+    const csvWithBom = "\uFEFF" + csvContent;
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="submissions.csv"');
+
+    return res.status(200).send(csvWithBom);
+  } catch (error) {
+    console.error("GET /admin/submissions/export error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+
 module.exports = router;

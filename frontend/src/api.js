@@ -55,3 +55,28 @@ export async function getAdminSubmissions(token) {
   const data = await parseJsonSafely(response);
   return { ok: response.ok, data };
 }
+
+export async function exportAdminSubmissions(token) {
+  const response = await fetch(`${API_BASE_URL}/admin/submissions/export`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Export failed: ${text.slice(0, 200)}`);
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "submissions.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  window.URL.revokeObjectURL(url);
+}
